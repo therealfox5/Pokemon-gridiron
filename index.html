@@ -95,23 +95,24 @@ var FA=[["SPD","Speed","= Speed"],["STR","Strength","70% Attack + 30% weight"],[
 var PWT={QB:{IQ:.35,SKL:.35,AGI:.15,SPD:.1,TGH:.05},HB:{SPD:.3,AGI:.3,STR:.15,TGH:.15,SKL:.1},FB:{STR:.4,TGH:.3,AGI:.1,IQ:.1,SPD:.1},WR:{SPD:.3,AGI:.25,SKL:.3,IQ:.1,STR:.05},TE:{STR:.25,SKL:.25,TGH:.15,SPD:.15,AGI:.1,IQ:.1},LT:{STR:.35,TGH:.25,AGI:.25,IQ:.15},LG:{STR:.45,TGH:.35,IQ:.1,AGI:.1},C:{STR:.35,TGH:.25,IQ:.3,AGI:.1},DE:{STR:.3,SPD:.25,AGI:.2,TGH:.15,IQ:.1},NT:{STR:.4,TGH:.4,IQ:.1,AGI:.1},OLB:{SPD:.25,STR:.25,AGI:.2,IQ:.15,TGH:.15},ILB:{IQ:.3,STR:.25,TGH:.2,SPD:.15,AGI:.1},CB:{SPD:.35,AGI:.3,IQ:.2,SKL:.1,TGH:.05},S:{IQ:.3,SPD:.25,AGI:.2,STR:.1,TGH:.15}};
 PWT.RT=PWT.LT;PWT.RG=PWT.LG;
 var SZ={QB:[.65,.45],HB:[.35,.5],FB:[.4,.7],WR:[.55,.3],TE:[.6,.65],LT:[.7,.85],LG:[.5,.9],C:[.45,.85],DE:[.65,.75],NT:[.35,.95],OLB:[.55,.6],ILB:[.5,.7],CB:[.4,.25],S:[.5,.35]};SZ.RT=SZ.LT;SZ.RG=SZ.LG;
-var SD={QB:"tall, medium build",HB:"compact, medium build",FB:"short and sturdy",WR:"lean, a bit tall",TE:"tall and strong",LT:"tall and heavy",LG:"short and very heavy",C:"short and heavy",DE:"tall and heavy",NT:"short and the heaviest",OLB:"athletic, medium-large",ILB:"sturdy, medium height",CB:"small and light",S:"lean, medium height"};SD.RT=SD.LT;SD.RG=SD.LG;
+var SD={QB:"tall, medium build",HB:"compact, medium build",FB:"short and sturdy",WR:"lean, a bit tall",TE:"tall and strong",LT:"tall and heavy",LG:"short and very heavy",C:"short and heavy",DE:"tall and heavy",NT:"short and the heaviest",OLB:"athletic, medium-large",ILB:"sturdy, medium height",CB:"small and light",S:"lean, medium height"};SD.RT=SD.LT;SD.RG=SD.LG;delete PWT.FB;delete SZ.FB;delete SD.FB;
 function sz(m,p){var t=SZ[p],dw=m.pw-t[1],dh=m.ph-t[0];return Math.round((.35-Math.sqrt(.7*dw*dw+.3*dh*dh))*14)}
 function sf(v){return v>=3?"great fit":v>=0?"fine":v>=-3?"a bit off":"poor fit"}
 function ovr(m,p){var w=PWT[p],t=0;for(var k in w)t+=w[k]*m.f[k];return Math.max(1,Math.min(99,Math.round(t)+sz(m,p)+cb(m)))}
 var ROWS={
- off:[["WR1","TE","WR2"],["LT","LG","C","RG","RT"],["QB"],["FB"],["HB"]],
+ off:[["WR1","","WR2","WR3"],["LT","LG","C","RG","RT","TE"],["","","QB","HB","",""]],
  def:[["S1","S2"],["CB1","OLB1","ILB1","ILB2","OLB2","CB2"],["DE1","NT","DE2"]]};
 var ALL=ROWS.off.concat(ROWS.def).reduce(function(a,r){return a.concat(r)},[]);
 var side="off",cur=null,mode="draft",CF=null,LF={},DR={seed:"",L:{},S:{}},L,armed="";
 try{var sv=JSON.parse(localStorage.getItem("pg_lineup")||"{}");if(sv&&typeof sv==="object")LF=sv;var dv=JSON.parse(localStorage.getItem("pg_draft")||"null");if(dv&&dv.seed&&dv.L)DR=dv;if(localStorage.getItem("pg_mode")==="free")mode="free";var cv=localStorage.getItem("pg_coach");if(cv)CF=+cv-1}catch(e){}
-if(!DR.seed)DR.seed=newSeed();if(!DR.S)DR.S={};L=mode==="draft"?DR.L:LF;
+if(!DR.seed)DR.seed=newSeed();if(!DR.S)DR.S={};delete LF.FB;delete DR.L.FB;delete DR.S.FB;L=mode==="draft"?DR.L:LF;
 function save(){try{localStorage.setItem("pg_lineup",JSON.stringify(LF));localStorage.setItem("pg_draft",JSON.stringify(DR));localStorage.setItem("pg_mode",mode);localStorage.setItem("pg_coach",CF==null?"":String(CF+1))}catch(e){}}
 function lab(id){return id.replace(/\d/g,"")}
 function $(i){return document.getElementById(i)}
 function render(){
  var h="";
  ROWS[side].forEach(function(r){h+='<div class="row">';r.forEach(function(id){
+  if(!id){h+='<span class="slot"></span>';return}
   var m=L[id]!=null?MON[L[id]]:null;
   h+='<button class="slot'+(m?" f":"")+'" data-id="'+id+'"><div class="dot"'+(m?' style="background:'+T[m.t][1]+'"':"")+'>'+(m?'<img src="'+IMG[L[id]]+'" alt="'+m.n+'">':"+")+'</div><span class="pos">'+lab(id)+(m&&showOvr()?" "+ovr(m,lab(id)):"")+'</span>'+(m?'<div class="nm">'+m.n+'</div>':"")+'</button>'});h+="</div>"});
  $("field").innerHTML=h;
@@ -140,7 +141,7 @@ function toast(t){var q=$("shm");if(q)q.textContent=t;$("toast").textContent=t;s
 $("clr").onclick=function(){if(mode==="draft"){newDraft(null);return}if(arm("clr","Tap again to clear your lineup"))return;LF={};L=LF;CF=null;save();render()};
 $("share").onclick=function(){
  var t=mode==="draft"?draftSummary()+"\n":"My Minimon Ball lineup\n";
- [["Offense","off"],["Defense","def"]].forEach(function(p){t+="\n"+p[0]+"\n";ROWS[p[1]].forEach(function(r){r.forEach(function(id){t+=lab(id)+": "+(L[id]!=null?MON[L[id]].n:"—")+"\n"})})});
+ [["Offense","off"],["Defense","def"]].forEach(function(p){t+="\n"+p[0]+"\n";ROWS[p[1]].forEach(function(r){r.forEach(function(id){if(!id)return;t+=lab(id)+": "+(L[id]!=null?MON[L[id]].n:"—")+"\n"})})});
  try{navigator.clipboard.writeText(t).then(function(){toast("Lineup copied")},function(){toast("Couldn't copy. Try again.")})}catch(e){toast("Couldn't copy. Try again.")}
 };
 var dtI=0,dtM="",dtT="s";
@@ -210,7 +211,7 @@ $("seed").addEventListener("click",function(e){var i=e.target.id;if(i==="sdr")sh
 document.querySelectorAll(".md").forEach(function(b){b.onclick=function(){track("mode_selected",{mode:b.dataset.m});mode=b.dataset.m;L=mode==="draft"?DR.L:LF;save();render()}});
 var copyText=$("share").onclick,shBlob=null;
 function loadImgs(cb){var im={},need=Object.keys(L).map(function(k){return L[k]}),n=need.length;if(!n)return cb(im);need.forEach(function(i){var g=new Image();g.onload=g.onerror=function(){if(--n===0)cb(im)};g.src=IMG[i];im[i]=g})}
-function drawCard(im){var W=1080,H=1880,c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d");
+function drawCard(im){var W=1080,H=1560,c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d");
  for(var y=0;y<H;y+=100){x.fillStyle=(y/100)%2?"#2f7a3b":"#3f8f4a";x.fillRect(0,y,W,100)}
  x.fillStyle="rgba(0,0,0,.35)";x.fillRect(0,0,W,290);x.textAlign="center";x.fillStyle="#fff";
  x.font="bold 80px Impact,Arial Black,sans-serif";x.fillText("MINIMON BALL",W/2,100);
@@ -221,7 +222,7 @@ function drawCard(im){var W=1080,H=1880,c=document.createElement("canvas");c.wid
  var cch=cc();if(cch)x.fillText("Coach: "+cch.n+" · "+cd(cch),W/2,262);var y0=340;
  [["OFFENSE","off"],["DEFENSE","def"]].forEach(function(sec){
   x.font="bold 34px Arial,sans-serif";x.fillStyle="#fff";x.fillText(sec[0],W/2,y0);y0+=30;
-  ROWS[sec[1]].forEach(function(r){var cw=W/r.length;r.forEach(function(id,k){var cx=cw*k+cw/2,cy=y0+60,i=L[id],m=i!=null?MON[i]:null;
+  ROWS[sec[1]].forEach(function(r){var cw=W/r.length;r.forEach(function(id,k){if(!id)return;var cx=cw*k+cw/2,cy=y0+60,i=L[id],m=i!=null?MON[i]:null;
    x.beginPath();x.arc(cx,cy,56,0,7);x.fillStyle=m?T[m.t][1]:"rgba(0,0,0,.25)";x.fill();x.lineWidth=5;x.strokeStyle="#fff";if(!m)x.setLineDash([10,8]);x.stroke();x.setLineDash([]);
    if(m)x.drawImage(im[i],cx-48,cy-48,96,96);
    x.fillStyle="#fff";x.font="bold 24px Arial,sans-serif";x.fillText(lab(id)+(m&&showOvr()?" "+ovr(m,lab(id)):""),cx,cy+82);
