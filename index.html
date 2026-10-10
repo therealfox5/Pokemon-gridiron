@@ -48,7 +48,7 @@ h1{font-size:22px;margin:0;font-family:Impact,"Arial Black",sans-serif;letter-sp
 small{display:block;color:var(--mu);font-size:11px;margin-left:94px}
 .fit{margin:12px 0 4px;font-size:15px}
 .md{padding:7px;font-size:13px}
-.seed{display:none;align-items:center;gap:8px;font-size:13px;color:var(--mu);margin-bottom:8px;flex-wrap:wrap}.seed b{color:var(--tx);letter-spacing:2px}.seed input{width:96px;padding:6px;border-radius:8px;border:1px solid var(--mu);background:var(--bg);color:var(--tx);font:inherit;font-size:14px;text-transform:uppercase}
+.seed{display:none;align-items:center;gap:8px;font-size:13px;color:var(--mu);margin-bottom:8px;flex-wrap:wrap}.seed b{color:var(--tx);letter-spacing:2px}.seed input{width:132px;padding:6px;border-radius:8px;border:1px solid var(--mu);background:var(--bg);color:var(--tx);font:inherit;font-size:14px;text-transform:uppercase}
 #dr{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;z-index:6}#dr.on{display:flex}#drb{overflow-y:auto;display:block}
 .cd{display:grid;grid-template-columns:64px 1fr auto;gap:8px;align-items:center;border:1px solid var(--mu);border-radius:12px;padding:8px;margin-top:8px}.cd img{width:64px;height:64px;border-radius:12px}.cd .btn{grid-column:1/-1}.ov2{text-align:center;font-size:11px;color:var(--mu)}.ov2 b{display:block;font-size:26px;color:var(--tx)}
 .big{font-size:60px;font-family:Impact,"Arial Black",sans-serif;text-align:center;line-height:1.1}.tier{text-align:center;font-weight:700;color:var(--ac);font-size:19px;margin-bottom:8px}.rs{display:flex;justify-content:space-between;margin-top:8px;font-size:14px}
@@ -56,6 +56,12 @@ small{display:block;color:var(--mu);font-size:11px;margin-left:94px}
 .av{width:64px;height:64px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:22px}
 .how{padding-left:20px;margin:8px 0}.how li{margin-bottom:9px;font-size:14px;line-height:1.35}
 </style>
+<script>
+(function(){var Q=[];window.track=function(n,p){if(window.posthog&&window.posthog.__loaded){try{window.posthog.capture(n,p)}catch(e){}}else Q.push([n,p])};
+var sc=document.createElement("script");sc.async=true;sc.src="https://us-assets.i.posthog.com/static/array.js";
+sc.onload=function(){try{window.posthog.init("phc_tS6Uto757LGWeAvoMVLvbkTjLs3k92iRZLPFx83T5hA4",{api_host:"https://us.i.posthog.com",defaults:"2025-05-24"});Q.splice(0).forEach(function(a){window.posthog.capture(a[0],a[1])})}catch(e){}};
+document.head.appendChild(sc)})();
+</script>
 </head>
 <body>
 <header><h1>MINIMON BALL</h1><span class="cnt" id="cnt"></span><button class="x" id="how" aria-label="How to play" style="border:1px solid var(--mu);border-radius:50%;width:30px;height:30px;padding:0">?</button></header>
@@ -160,7 +166,7 @@ $("dt").addEventListener("click",function(e){
  else if(b.id==="drm"){delete L[cur];save();closeDetail();render()}});
 function newSeed(){var c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",x="";for(var i=0;i<6;i++)x+=c[Math.floor(Math.random()*c.length)];return x}
 function arm(k,msg){if(!Object.keys(L).length)return false;if(armed===k){armed="";return false}armed=k;toast(msg);setTimeout(function(){armed=""},3000);return true}
-function newDraft(seed){if(arm("nd"+(seed||"*"),"Tap again to erase this draft and start over"))return;DR={seed:seed||newSeed(),L:{},S:{}};L=DR.L;save();render()}
+function newDraft(seed){if(arm("nd"+(seed||"*"),"Tap again to erase this draft and start over"))return;track("new_draft",{custom_seed:!!seed});DR={seed:seed||newSeed(),L:{},S:{}};L=DR.L;save();render()}
 function chips(m){return[m.t,m.t2].filter(Boolean).map(function(t){return'<span class="chip" style="background:'+T[t][1]+'">'+T[t][0]+'</span>'}).join("")}
 function stats(){var a=[],o=0,d=0,no=0,nd=0;["off","def"].forEach(function(sd){ROWS[sd].forEach(function(r){r.forEach(function(id){if(L[id]==null)return;var m=MON[L[id]],v=ovr(m,lab(id));a.push([id,m.n,v]);if(sd==="off"){o+=v;no++}else{d+=v;nd++}})})});
  var team=a.length?(o+d)/a.length:0,w=Math.max(0,Math.min(17,Math.round(17*Math.pow(Math.max(0,(team-60)/24),1.6))));
@@ -184,19 +190,19 @@ function drawDraft(){var pos=lab(cur),u=DR.S[cur]||0,off=offer(cur,u,u>3?1:3);
  if(u<4)h+='<button class="btn g" id="shf" style="width:100%;margin-top:10px">'+(u<3?"Shuffle ("+(3-u)+" left)":"Shuffle again (forced pick)")+'</button>';
  $("drb").innerHTML=h}
 function showResults(){var q=stats();
- $("drb").innerHTML='<h2><span>Season results</span><button class="x" id="drx">Close</button></h2><div class="big">'+q.team.toFixed(1)+'</div><div class="tier">'+q.tier+'</div><div class="rs"><span>Projected record</span><b>'+q.w+'-'+(17-q.w)+'</b></div><div class="rs"><span>Offense</span><b>'+q.off.toFixed(1)+'</b></div><div class="rs"><span>Defense</span><b>'+q.def.toFixed(1)+'</b></div><div class="rs"><span>Best pick</span><b>'+q.best[1]+' ('+lab(q.best[0])+' '+q.best[2]+')</b></div><div class="rs"><span>Weakest link</span><b>'+q.worst[1]+' ('+lab(q.worst[0])+' '+q.worst[2]+')</b></div>\'+(cc()?\'<div class="rs"><span>Coach</span><b>\'+cc().n+\'</b></div>\':\'\')+\'<div class="rs"><span>Seed</span><b>'+DR.seed+'</b></div><div class="acts"><button class="btn" id="rcp">Share result</button><button class="btn g" id="drx">Close</button></div>';
+ $("drb").innerHTML='<h2><span>Season results</span><button class="x" id="drx">Close</button></h2><div class="big">'+q.team.toFixed(1)+'</div><div class="tier">'+q.tier+'</div><div class="rs"><span>Projected record</span><b>'+q.w+'-'+(17-q.w)+'</b></div><div class="rs"><span>Offense</span><b>'+q.off.toFixed(1)+'</b></div><div class="rs"><span>Defense</span><b>'+q.def.toFixed(1)+'</b></div><div class="rs"><span>Best pick</span><b>'+q.best[1]+' ('+lab(q.best[0])+' '+q.best[2]+')</b></div><div class="rs"><span>Weakest link</span><b>'+q.worst[1]+' ('+lab(q.worst[0])+' '+q.worst[2]+')</b></div>'+(cc()?'<div class="rs"><span>Coach</span><b>'+cc().n+'</b></div>':'')+'<div class="rs"><span>Seed</span><b>'+DR.seed+'</b></div><div class="acts"><button class="btn" id="rcp">Share result</button><button class="btn g" id="drx">Close</button></div>';
  $("dr").classList.add("on")}
 $("dr").addEventListener("click",function(e){var t=e.target;
  if(t===$("dr")||t.id==="drx"){closeDraft();return}
- if(t.id==="shf"){var u=DR.S[cur]||0;DR.S[cur]=u<3?u+1:4;save();drawDraft();return}
+ if(t.id==="shf"){var u=DR.S[cur]||0;track("shuffle",{pos:lab(cur),shuffle_number:u+1});DR.S[cur]=u<3?u+1:4;save();drawDraft();return}
  if(t.id==="rcp"){openShare();return}
- if(t.id==="cpi"){copyImg();return}if(t.id==="shr"){shareImg();return}if(t.id==="cpt"){copyText();return}
+ if(t.id==="cpi"){copyImg();return}if(t.id==="shr"){shareImg();return}if(t.id==="cpt"){track("share_text_copy_tapped");copyText();return}
  var ch=t.closest("[data-c]");if(ch){setCoach(+ch.dataset.c);return}if(t.id==="ccl"){setCoach(null);return}
- if(t.id==="cshf"){var u2=DR.S.COACH||0;DR.S.COACH=Math.min(u2+1,3);save();coachDraft();return}
- var d=t.closest("[data-d]");if(d){var sl=cur;L[sl]=+d.dataset.d;delete DR.S[sl];save();closeDraft();render();if(stats().n===22)showResults()}});
+ if(t.id==="cshf"){var u2=DR.S.COACH||0;track("coach_shuffle",{shuffle_number:u2+1});DR.S.COACH=Math.min(u2+1,3);save();coachDraft();return}
+ var d=t.closest("[data-d]");if(d){var sl=cur,u0=DR.S[sl]||0;if(!Object.keys(L).length)track("draft_started",{seed:DR.seed});L[sl]=+d.dataset.d;track("player_drafted",{pos:lab(sl),pokemon:MON[L[sl]].n,rating:ovr(MON[L[sl]],lab(sl)),shuffles_used:Math.min(u0,3)});delete DR.S[sl];save();closeDraft();render();if(stats().n===22){var q=stats();track("draft_completed",{score:+q.team.toFixed(1),tier:q.tier,wins:q.w,offense:+q.off.toFixed(1),defense:+q.def.toFixed(1),coach:cc()?cc().n:"none",seed:DR.seed});showResults()}}});
 $("seed").addEventListener("click",function(e){var i=e.target.id;if(i==="sdr")showResults();
- if(i==="sgo"){var v=$("sin").value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8);if(v)newDraft(v)}});
-document.querySelectorAll(".md").forEach(function(b){b.onclick=function(){mode=b.dataset.m;L=mode==="draft"?DR.L:LF;save();render()}});
+ if(i==="sgo"){var v=$("sin").value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8);if(v){track("friend_seed_entered",{seed:v});newDraft(v)}}});
+document.querySelectorAll(".md").forEach(function(b){b.onclick=function(){track("mode_selected",{mode:b.dataset.m});mode=b.dataset.m;L=mode==="draft"?DR.L:LF;save();render()}});
 var copyText=$("share").onclick,shBlob=null;
 function loadImgs(cb){var im={},need=Object.keys(L).map(function(k){return L[k]}),n=need.length;if(!n)return cb(im);need.forEach(function(i){var g=new Image();g.onload=g.onerror=function(){if(--n===0)cb(im)};g.src=IMG[i];im[i]=g})}
 function drawCard(im){var W=1080,H=1880,c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d");
@@ -217,11 +223,11 @@ function drawCard(im){var W=1080,H=1880,c=document.createElement("canvas");c.wid
    if(m){x.font="22px Arial,sans-serif";x.fillText(m.n,cx,cy+108)}});y0+=170});
   y0+=40});
  x.font="28px Arial,sans-serif";x.fillStyle="rgba(255,255,255,.85)";x.fillText("minimonball.com",W/2,H-28);return c}
-function openShare(){loadImgs(function(im){var c=drawCard(im);shBlob=null;c.toBlob(function(b){shBlob=b});
+function openShare(){track("share_opened",{mode:mode,picks:Object.keys(L).length});loadImgs(function(im){var c=drawCard(im);shBlob=null;c.toBlob(function(b){shBlob=b});
  $("drb").innerHTML='<h2><span>Share your team</span><button class="x" id="drx">Close</button></h2><img src="'+c.toDataURL("image/png")+'" alt="Your team" style="width:100%;border-radius:12px"><div class="mu" id="shm">Tap Copy image, or press and hold the picture to save it.</div><div class="acts"><button class="btn" id="cpi">Copy image</button><button class="btn g" id="shr">Share…</button></div><button class="btn g" id="cpt" style="width:100%;margin-top:8px">Copy text instead</button>';
  $("dr").classList.add("on");$("drb").scrollTop=0})}
-function copyImg(){var bad="Couldn't copy. Press and hold the picture to save it instead.";try{if(!shBlob||!window.ClipboardItem)throw 0;navigator.clipboard.write([new ClipboardItem({"image/png":shBlob})]).then(function(){toast("Image copied")},function(){toast(bad)})}catch(e){toast(bad)}}
-function shareImg(){try{var f=new File([shBlob],"minimon-ball.png",{type:"image/png"});if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f],title:"Minimon Ball"}).catch(function(){});else toast("Sharing isn't available here. Press and hold the picture to save it.")}catch(e){toast("Sharing isn't available here. Press and hold the picture to save it.")}}
+function copyImg(){track("share_image_copy_tapped");var bad="Couldn't copy. Press and hold the picture to save it instead.";try{if(!shBlob||!window.ClipboardItem)throw 0;navigator.clipboard.write([new ClipboardItem({"image/png":shBlob})]).then(function(){toast("Image copied")},function(){toast(bad)})}catch(e){toast(bad)}}
+function shareImg(){track("share_sheet_tapped");try{var f=new File([shBlob],"minimon-ball.png",{type:"image/png"});if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f],title:"Minimon Ball"}).catch(function(){});else toast("Sharing isn't available here. Press and hold the picture to save it.")}catch(e){toast("Sharing isn't available here. Press and hold the picture to save it.")}}
 $("share").onclick=openShare;
 var COACHES=[{n:"Brock",t:["R"],b:3,i:"BR"},{n:"Misty",t:["W"],b:3,i:"MI"},{n:"Lt. Surge",t:["E"],b:3,i:"LS"},{n:"Erika",t:["G"],b:3,i:"ER"},{n:"Koga",t:["P"],b:3,i:"KO"},{n:"Sabrina",t:["S"],b:3,i:"SA"},{n:"Blaine",t:["F"],b:3,i:"BL"},{n:"Giovanni",t:["D"],b:3,i:"GI"},{n:"Ash",all:1,b:1,i:"AS"},{n:"Gary",t:["W","F","S","Y"],b:2,i:"GA"}];
 function cc(){var i=mode==="draft"?DR.C:CF;return i==null?null:COACHES[i]}
@@ -230,7 +236,7 @@ function cb(m){var c=cc();return c&&hits(c,m)?c.b:0}
 function cd(c){return"+"+c.b+" to "+(c.all?"every player":c.t.map(function(t){return T[t][0]}).join("/")+" types")}
 function cc2(c){return c.all?"#e3350d":T[c.t[0]][1]}
 function drawCoach(){var c=cc();$("coach").innerHTML=c?'<span class="av" style="background:'+cc2(c)+'">'+c.i+'</span><span><b>Coach '+c.n+'</b><br><small style="margin:0">'+cd(c)+'</small></span>':'<span class="av" style="background:var(--mu)">+</span><span><b>'+(mode==="draft"?"Draft your coach":"Pick your coach")+'</b><br><small style="margin:0">'+(mode==="draft"?"1 random coach, 3 shuffles, then you\'re locked in":"Gym leaders, Ash and Gary each boost your roster")+'</small></span>'}
-function setCoach(i){if(mode==="draft"){DR.C=i;delete DR.S.COACH}else CF=i;save();closeDraft();render()}
+function setCoach(i){if(i!=null)track("coach_selected",{coach:COACHES[i].n,mode:mode,shuffles_used:mode==="draft"?Math.min(DR.S.COACH||0,3):0});if(mode==="draft"){DR.C=i;delete DR.S.COACH}else CF=i;save();closeDraft();render()}
 function openCoach(){if(mode==="draft"){coachDraft();return}var cur2=mode==="draft"?DR.C:CF,n=Object.keys(L).length,h='<h2><span>Pick your coach</span><button class="x" id="drx">Close</button></h2><div class="mu">Your coach boosts matching players on your roster. You can switch coaches any time.</div>';
  COACHES.forEach(function(c,i){var hit=0;Object.keys(L).forEach(function(k){if(hits(c,MON[L[k]]))hit++});
   h+='<div class="cd"><div class="av" style="background:'+cc2(c)+'">'+c.i+'</div><div><b>'+c.n+'</b><div class="mu">'+cd(c)+'</div><div class="mu">Boosts '+hit+' of your '+n+' picks</div></div><span></span><button class="btn'+(cur2===i?" g":"")+'" data-c="'+i+'">'+(cur2===i?"Current coach":"Pick "+c.n)+'</button></div>'});
@@ -245,7 +251,7 @@ function coachDraft(){var n=Object.keys(L).length,u=Math.min(DR.S.COACH||0,3),h;
   if(u<3)h+='<button class="btn g" id="cshf" style="width:100%;margin-top:10px">Shuffle ('+(3-u)+' left)</button>'}
  $("drb").innerHTML=h;$("dr").classList.add("on");$("drb").scrollTop=0}
 $("coach").onclick=openCoach;
-function showHow(){try{localStorage.setItem("pg_seen","1")}catch(e){}
+function showHow(){track("how_to_viewed");try{localStorage.setItem("pg_seen","1")}catch(e){}
  $("drb").innerHTML='<h2><span>How to play</span><button class="x" id="drx">Close</button></h2><ol class="how"><li><b>Draft your 22.</b> Tap a spot on the field. Use the Offense and Defense tabs to switch sides.</li><li><b>Pick from 3.</b> Each spot offers 3 random Pokémon. Shuffle up to 3 times. If you shuffle a 4th time, you get 1 Pokémon and have to take it.</li><li><b>Check the ratings.</b> Pokémon stats become football ratings. The number next to a position is how good that Pokémon is there.</li><li><b>Draft a coach.</b> Tap the Coach bar to get 1 random coach. Shuffle up to 3 times, but the coach after your last shuffle is final. Coaches boost certain types.</li><li><b>Rank your team.</b> Fill all 22 spots to get a team score, tier and projected record. Tap Share for a picture of your team.</li><li><b>Challenge friends.</b> Friends who enter your seed code get the same offers, so you can compare scores.</li></ol><div class="mu">Display mode lets you build any team you want from all the Pokémon, just for fun.</div><div class="acts"><button class="btn" id="drx">Let\'s play</button></div>';
  $("dr").classList.add("on");$("drb").scrollTop=0}
 $("how").onclick=showHow;
