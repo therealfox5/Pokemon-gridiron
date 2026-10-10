@@ -250,7 +250,7 @@ function showHow(){try{localStorage.setItem("pg_seen","1")}catch(e){}
  $("dr").classList.add("on");$("drb").scrollTop=0}
 $("how").onclick=showHow;
 render();
-try{if(!localStorage.getItem("pg_seen"))showHow()}catch(e){showHow()}
+showHow()
 </script>
 </body>
 </html>
