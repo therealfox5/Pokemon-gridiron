@@ -192,7 +192,7 @@ $("dr").addEventListener("click",function(e){var t=e.target;
  if(t.id==="rcp"){openShare();return}
  if(t.id==="cpi"){copyImg();return}if(t.id==="shr"){shareImg();return}if(t.id==="cpt"){copyText();return}
  var ch=t.closest("[data-c]");if(ch){setCoach(+ch.dataset.c);return}if(t.id==="ccl"){setCoach(null);return}
- if(t.id==="cshf"){var u2=DR.S.COACH||0;DR.S.COACH=u2<3?u2+1:4;save();coachDraft();return}
+ if(t.id==="cshf"){var u2=DR.S.COACH||0;DR.S.COACH=Math.min(u2+1,3);save();coachDraft();return}
  var d=t.closest("[data-d]");if(d){var sl=cur;L[sl]=+d.dataset.d;delete DR.S[sl];save();closeDraft();render();if(stats().n===22)showResults()}});
 $("seed").addEventListener("click",function(e){var i=e.target.id;if(i==="sdr")showResults();
  if(i==="sgo"){var v=$("sin").value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8);if(v)newDraft(v)}});
@@ -229,7 +229,7 @@ function hits(c,m){return c.all||c.t.indexOf(m.t)>=0||(m.t2&&c.t.indexOf(m.t2)>=
 function cb(m){var c=cc();return c&&hits(c,m)?c.b:0}
 function cd(c){return"+"+c.b+" to "+(c.all?"every player":c.t.map(function(t){return T[t][0]}).join("/")+" types")}
 function cc2(c){return c.all?"#e3350d":T[c.t[0]][1]}
-function drawCoach(){var c=cc();$("coach").innerHTML=c?'<span class="av" style="background:'+cc2(c)+'">'+c.i+'</span><span><b>Coach '+c.n+'</b><br><small style="margin:0">'+cd(c)+'</small></span>':'<span class="av" style="background:var(--mu)">+</span><span><b>'+(mode==="draft"?"Draft your coach":"Pick your coach")+'</b><br><small style="margin:0">'+(mode==="draft"?"3 random coaches, 3 shuffles, then you\'re locked in":"Gym leaders, Ash and Gary each boost your roster")+'</small></span>'}
+function drawCoach(){var c=cc();$("coach").innerHTML=c?'<span class="av" style="background:'+cc2(c)+'">'+c.i+'</span><span><b>Coach '+c.n+'</b><br><small style="margin:0">'+cd(c)+'</small></span>':'<span class="av" style="background:var(--mu)">+</span><span><b>'+(mode==="draft"?"Draft your coach":"Pick your coach")+'</b><br><small style="margin:0">'+(mode==="draft"?"1 random coach, 3 shuffles, then you\'re locked in":"Gym leaders, Ash and Gary each boost your roster")+'</small></span>'}
 function setCoach(i){if(mode==="draft"){DR.C=i;delete DR.S.COACH}else CF=i;save();closeDraft();render()}
 function openCoach(){if(mode==="draft"){coachDraft();return}var cur2=mode==="draft"?DR.C:CF,n=Object.keys(L).length,h='<h2><span>Pick your coach</span><button class="x" id="drx">Close</button></h2><div class="mu">Your coach boosts matching players on your roster. You can switch coaches any time.</div>';
  COACHES.forEach(function(c,i){var hit=0;Object.keys(L).forEach(function(k){if(hits(c,MON[L[k]]))hit++});
@@ -237,17 +237,16 @@ function openCoach(){if(mode==="draft"){coachDraft();return}var cur2=mode==="dra
  if(cur2!=null)h+='<button class="btn g" id="ccl" style="width:100%;margin-top:10px">Remove coach</button>';
  $("drb").innerHTML=h;$("dr").classList.add("on");$("drb").scrollTop=0}
 function rng(k){var h=2166136261;for(var i=0;i<k.length;i++){h^=k.charCodeAt(i);h=Math.imul(h,16777619)}var a=h>>>0;return function(){a+=0x6D2B79F5;var t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
-function coachOffer(u,n){var r=rng(DR.seed+"|COACH|"+u),p=COACHES.map(function(_,i){return i});for(var i=p.length-1;i>0;i--){var j=Math.floor(r()*(i+1)),x=p[i];p[i]=p[j];p[j]=x}return p.slice(0,n)}
-function coachDraft(){var n=Object.keys(L).length,u=DR.S.COACH||0,h;
+function coachOffer(u,n){var r=rng(DR.seed+"|COACH"),p=COACHES.map(function(_,i){return i});for(var i=p.length-1;i>0;i--){var j=Math.floor(r()*(i+1)),x=p[i];p[i]=p[j];p[j]=x}return p.slice(u,u+n)}
+function coachDraft(){var n=Object.keys(L).length,u=Math.min(DR.S.COACH||0,3),h;
  function card(c,btn){var hit=0;Object.keys(L).forEach(function(k){if(hits(c,MON[L[k]]))hit++});return'<div class="cd"><div class="av" style="background:'+cc2(c)+'">'+c.i+'</div><div><b>'+c.n+'</b><div class="mu">'+cd(c)+'</div><div class="mu">Boosts '+hit+' of your '+n+' picks so far</div></div><span></span>'+btn+'</div>'}
  if(DR.C!=null)h='<h2><span>Your coach</span><button class="x" id="drx">Close</button></h2><div class="mu">Coaches are locked once drafted. Start a new draft to pick again.</div>'+card(COACHES[DR.C],"");
- else{h='<h2><span>Draft your coach</span><button class="x" id="drx">Close</button></h2><div class="mu">'+(u>3?"Final pick: you used all 3 shuffles, so you have to take this coach.":"Shuffles left: "+(3-u)+" of 3")+'. Your coach boosts matching players on your roster.</div>';
-  coachOffer(u,u>3?1:3).forEach(function(i){h+=card(COACHES[i],'<button class="btn" data-c="'+i+'">Draft '+COACHES[i].n+'</button>')});
-  if(u<4)h+='<button class="btn g" id="cshf" style="width:100%;margin-top:10px">'+(u<3?"Shuffle ("+(3-u)+" left)":"Shuffle again (forced pick)")+'</button>'}
+ else{var i=coachOffer(u,1)[0];h='<h2><span>Draft your coach</span><button class="x" id="drx">Close</button></h2><div class="mu">'+(u>=3?"Final coach: you used all 3 shuffles, so you have to take this one.":"Shuffles left: "+(3-u)+" of 3. After your last shuffle, the next coach is final.")+'</div>'+card(COACHES[i],'<button class="btn" data-c="'+i+'">Draft '+COACHES[i].n+'</button>');
+  if(u<3)h+='<button class="btn g" id="cshf" style="width:100%;margin-top:10px">Shuffle ('+(3-u)+' left)</button>'}
  $("drb").innerHTML=h;$("dr").classList.add("on");$("drb").scrollTop=0}
 $("coach").onclick=openCoach;
 function showHow(){try{localStorage.setItem("pg_seen","1")}catch(e){}
- $("drb").innerHTML='<h2><span>How to play</span><button class="x" id="drx">Close</button></h2><ol class="how"><li><b>Draft your 22.</b> Tap a spot on the field. Use the Offense and Defense tabs to switch sides.</li><li><b>Pick from 3.</b> Each spot offers 3 random Pokémon. Shuffle up to 3 times. If you shuffle a 4th time, you get 1 Pokémon and have to take it.</li><li><b>Check the ratings.</b> Pokémon stats become football ratings. The number next to a position is how good that Pokémon is there.</li><li><b>Draft a coach.</b> Tap the Coach bar. Coaches boost certain types, so pick one that fits your team.</li><li><b>Rank your team.</b> Fill all 22 spots to get a team score, tier and projected record. Tap Share for a picture of your team.</li><li><b>Challenge friends.</b> Friends who enter your seed code get the same offers, so you can compare scores.</li></ol><div class="mu">Display mode lets you build any team you want from all the Pokémon, just for fun.</div><div class="acts"><button class="btn" id="drx">Let\'s play</button></div>';
+ $("drb").innerHTML='<h2><span>How to play</span><button class="x" id="drx">Close</button></h2><ol class="how"><li><b>Draft your 22.</b> Tap a spot on the field. Use the Offense and Defense tabs to switch sides.</li><li><b>Pick from 3.</b> Each spot offers 3 random Pokémon. Shuffle up to 3 times. If you shuffle a 4th time, you get 1 Pokémon and have to take it.</li><li><b>Check the ratings.</b> Pokémon stats become football ratings. The number next to a position is how good that Pokémon is there.</li><li><b>Draft a coach.</b> Tap the Coach bar to get 1 random coach. Shuffle up to 3 times, but the coach after your last shuffle is final. Coaches boost certain types.</li><li><b>Rank your team.</b> Fill all 22 spots to get a team score, tier and projected record. Tap Share for a picture of your team.</li><li><b>Challenge friends.</b> Friends who enter your seed code get the same offers, so you can compare scores.</li></ol><div class="mu">Display mode lets you build any team you want from all the Pokémon, just for fun.</div><div class="acts"><button class="btn" id="drx">Let\'s play</button></div>';
  $("dr").classList.add("on");$("drb").scrollTop=0}
 $("how").onclick=showHow;
 render();
